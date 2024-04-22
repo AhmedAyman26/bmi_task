@@ -42,6 +42,8 @@ dependencies:
   flutter_bloc:
   equatable:
   get_it:
+  flutter_screenutil:
+  shared_preferences:
 
 
 

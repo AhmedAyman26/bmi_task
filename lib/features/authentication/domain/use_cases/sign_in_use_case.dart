@@ -4,7 +4,7 @@ class SignInUseCase {
   final AuthenticationRepository _authenticationRepository;
 
   SignInUseCase(this._authenticationRepository);
-  Future<void> call() async {
-    await _authenticationRepository.signIn();
+  Future<String> call() async {
+    return await _authenticationRepository.signIn();
   }
 }

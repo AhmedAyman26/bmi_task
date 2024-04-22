@@ -10,17 +10,20 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   AuthenticationRepositoryImplementation(this.networkInfo);
 
   @override
-  Future<void> signIn() async {
+  Future<String> signIn() async {
+    late String? userId ;
     if (!(await networkInfo.isConnected)) {
       throw Exception('No internet connection');
     } else {
       await firebaseAuth.signInAnonymously().then((value)
       {
+        userId= value.user?.uid;
         print(value.user!.uid);
       }).catchError((error)
       {
         throw Exception(error.toString());
       });
     }
+    return userId??'';
   }
 }
