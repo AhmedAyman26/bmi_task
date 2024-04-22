@@ -20,24 +20,12 @@ class BMIRepositoryImpl extends BMIRepository {
 
   @override
   Stream<List<BMIEntriesModel>> getBmiEntriesFromFireStore() {
-    print("edf;jds;jfsdf");
-    try {
-      return bmiCollectionReference
-          .snapshots()
-          .map((event) {
-        List<BMIEntriesModel> entries = [];
-        print("ldjsfhjsdjfhdsf${event.docs.length}");
-        for (var document in event.docs) {
-          print("ahmed${document.data()}");
-          entries.add(BMIEntriesModel.fromJson(document.data()));
-          print("dhdhfdshfhjdkshfksdfsd");
-        }
-        print("#@^54%${entries.length}");
-        return entries;
-      });
-    }
-    catch (error) {
-      print("ewrewrewrwerwerewr${error.toString()}");
-      throw Exception(error);}
+    return bmiCollectionReference.snapshots().map((event) {
+      List<BMIEntriesModel> entries = [];
+      for (var document in event.docs) {
+        entries.add(BMIEntriesModel.fromJson(document.data()));
+      }
+      return entries;
+    });
   }
 }

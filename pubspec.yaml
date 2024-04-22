@@ -44,7 +44,7 @@ dependencies:
   get_it:
   flutter_screenutil:
   shared_preferences:
-
+  pretty_gauge:
 
 
 dev_dependencies:

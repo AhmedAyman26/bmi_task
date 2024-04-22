@@ -143,7 +143,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                     weight: double.parse(weightController.text),
                     age: double.parse(ageController.text),
                     bmi: state.bmi ?? 0.0,
-                    dateTime: DateTime.now().millisecondsSinceEpoch));
+                    dateTime: DateTime.now().toString()));
                 BlocProvider
                     .of<BmiCubit>(context)
                     .addBmiEntries(BMIEntriesModel(
@@ -151,7 +151,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                     weight: double.parse(weightController.text),
                     age: double.parse(ageController.text),
                     bmi: state.bmi ?? 0.0,
-                    dateTime: DateTime.now().millisecondsSinceEpoch));
+                    dateTime: DateTime.now().toString()));
               }
             }, radius: 30,);
           },

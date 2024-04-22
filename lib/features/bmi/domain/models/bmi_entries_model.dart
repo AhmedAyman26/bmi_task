@@ -6,7 +6,7 @@ class BMIEntriesModel extends Equatable {
   final double height;
   final double weight;
   final double bmi;
-  final int dateTime;
+  final String dateTime;
 
   const BMIEntriesModel({
     required this.age,
@@ -37,4 +37,12 @@ class BMIEntriesModel extends Equatable {
 @override
 List<Object?> get props => [age, height, weight, bmi, dateTime];
 
+}
+
+enum BmiStatus
+{
+  underWeight,
+  normal,
+  overWeight,
+  obesity,
 }
