@@ -7,7 +7,7 @@ class BmiStates extends Equatable {
   final double? bmi;
   final String? errorMessage;
   final RequestStatus getBmiEntriesState;
-  final Stream<List<BMIEntriesModel>>? bmiEntries;
+  final List<BMIEntriesModel>? bmiEntries;
 
   const BmiStates(
       {this.bmi,
@@ -21,7 +21,7 @@ class BmiStates extends Equatable {
       RequestStatus? addBmiEntriesStatus,
       String? errorMessage,
       RequestStatus? getBmiEntriesState,
-      Stream<List<BMIEntriesModel>>? bmiEntries}) {
+      List<BMIEntriesModel>? bmiEntries}) {
     return BmiStates(
         bmi: bmi ?? this.bmi,
         addBmiEntriesStatus: addBmiEntriesStatus ?? this.addBmiEntriesStatus,

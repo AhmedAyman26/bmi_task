@@ -2,6 +2,7 @@ import 'package:bmi_task/core/di/app_injector.dart';
 import 'package:bmi_task/core/utils/request_status.dart';
 import 'package:bmi_task/core/widgets/app_button.dart';
 import 'package:bmi_task/core/widgets/app_text_form_field.dart';
+import 'package:bmi_task/core/widgets/show_loading_widget.dart';
 import 'package:bmi_task/features/bmi/domain/models/bmi_entries_model.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_cubit.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_results_page.dart';
@@ -17,7 +18,7 @@ class BmiPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BmiCubit(injector(),injector()),
+      create: (context) => BmiCubit(injector(),injector(),),
       child: const BmiPageBody(),
     );
   }
@@ -97,7 +98,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                       AppTextFormField(
                         controller: heightController,
                         hintText: 'Height',
-                        suffix: Text('m'),
+                        suffix: const Text('m'),
                         label: 'Height',
                         validate: (p0) {
                           if (p0!.isEmpty) {
@@ -109,7 +110,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                       AppTextFormField(
                         controller: weightController,
                         hintText: 'Weight',
-                        suffix: Text('kg'),
+                        suffix: const Text('kg'),
                         label: 'Weight',
                         validate: (p0) {
                           if (p0!.isEmpty) {
@@ -131,7 +132,11 @@ class _BmiPageBodyState extends State<BmiPageBody> {
         child: BlocConsumer<BmiCubit, BmiStates>(
           listener: (context, state) {
             if (state.addBmiEntriesStatus == RequestStatus.success) {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => BmiResultPage(),));
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  BmiResultPage(bmi: state.bmi),));
+            }
+            if(state.addBmiEntriesStatus == RequestStatus.loading){
+              showLoading(context);
             }
           },
           builder: (context, state) {
@@ -141,7 +146,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                     .of<BmiCubit>(context).calculateBmi(BMIEntriesModel(
                     height: double.parse(heightController.text),
                     weight: double.parse(weightController.text),
-                    age: double.parse(ageController.text),
+                    age: ageController.text,
                     bmi: state.bmi ?? 0.0,
                     dateTime: DateTime.now().toString()));
                 BlocProvider
@@ -149,7 +154,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                     .addBmiEntries(BMIEntriesModel(
                     height: double.parse(heightController.text),
                     weight: double.parse(weightController.text),
-                    age: double.parse(ageController.text),
+                    age: ageController.text,
                     bmi: state.bmi ?? 0.0,
                     dateTime: DateTime.now().toString()));
               }

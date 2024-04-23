@@ -1,4 +1,6 @@
 import 'package:bmi_task/core/di/app_injector.dart';
+import 'package:bmi_task/core/utils/request_status.dart';
+import 'package:bmi_task/features/bmi/domain/models/bmi_entries_model.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_cubit.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_states.dart';
 import 'package:flutter/material.dart';
@@ -8,19 +10,21 @@ import 'package:pretty_gauge/pretty_gauge.dart';
 
 class BmiResultPage extends StatelessWidget {
   final double? bmi;
+
   const BmiResultPage({super.key, this.bmi});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BmiCubit(injector(), injector()),
-      child:  BmiResultsPageBody(bmi: bmi),
+      create: (context) => BmiCubit(injector(), injector(),),
+      child: BmiResultsPageBody(bmi: bmi),
     );
   }
 }
 
 class BmiResultsPageBody extends StatefulWidget {
   final double? bmi;
+
   const BmiResultsPageBody({super.key, this.bmi});
 
   @override
@@ -34,107 +38,175 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
 
   Color? bmiStatusColor;
 
+  BMIEntriesModel? lastEntry;
+
+  ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
+    setBmiInterpretation();
     context.read<BmiCubit>().getBmiEntries();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        context.read<BmiCubit>().loadMoreEntries(lastEntry);
+      }
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          const Text(
-            'Your BMI is',
-            style: TextStyle(fontSize: 30, color: Colors.greenAccent),
-          ),
-          SizedBox(
-            height: 20.h,
-          ),
-          PrettyGauge(
-            showMarkers: true,
-            gaugeSize: 400,
-            currentValue: 10,
-            valueWidget: const Text('20'),
-            minValue: 0,
-            maxValue: 40,
-            startMarkerStyle: TextStyle(fontSize: 30.sp,color: Colors.black),
-            endMarkerStyle: TextStyle(fontSize: 30.sp,color: Colors.black),
-            segments: 
-            [
-              GaugeSegment('UnderWeight', 18.5, Colors.red),
-              GaugeSegment('UnderWeight', 6.4, Colors.green),
-              GaugeSegment('UnderWeight', 5, Colors.orange),
-              GaugeSegment('UnderWeight', 10.1, Colors.pink),
-            ],
-          ),
-          // const Text(
-          //   '21.1',
-          //   style: TextStyle(fontSize: 30, color: Colors.greenAccent),
-          // ),
-          // SizedBox(
-          //   height: 20.h,
-          // ),
-          // const Text(
-          //   'This value in the${''}',
-          //   style: TextStyle(fontSize: 30, color: Colors.greenAccent),
-          // ),
-          BlocBuilder<BmiCubit, BmiStates>(
-            builder: (context, state) {
-              return StreamBuilder(
-                  stream: state.bmiEntries,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Expanded(
-                        child: Column(
-                          children: [
-                            const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children:
-                            [
-                              Text('age'),
-                              Text('height'),
-                              Text('weight'),
-                              Text('bmi'),
-                            ],),
-                            Expanded(
-                              child: ListView.builder(
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                      color: Colors.greenAccent,
-                                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-                                        Text(
-                                          snapshot.data![index].age .toString(),
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                        Text(
-                                          snapshot.data![index].height.toString(),
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                        Text(
-                                          snapshot.data![index].weight.toString(),
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                        Text(
-                                          snapshot.data![index].bmi.toString(),
-                                          style: const TextStyle(color: Colors.black),
-                                        ),
-                                      ]));
-                                },
-                                itemCount: snapshot.data!.length,
-                              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Text(
+              'Your BMI is',
+              style: TextStyle(fontSize: 30, color: Colors.greenAccent),
+            ),
+            SizedBox(
+              height: 20.h,
+            ),
+            PrettyGauge(
+              showMarkers: true,
+              gaugeSize: 400,
+              currentValue: widget.bmi,
+              valueWidget:  Column(
+                children: [
+                  Text(widget.bmi?.toStringAsFixed(1)??'', style: TextStyle(fontSize: 30.sp, color: Colors.black),),
+                  Text(bmiStatus??'', style: TextStyle(fontSize: 20.sp, color: bmiStatusColor,)),
+                ],
+              ),
+              minValue: 0,
+              maxValue: 40,
+              startMarkerStyle: TextStyle(fontSize: 30.sp, color: Colors.black),
+              endMarkerStyle: TextStyle(fontSize: 30.sp, color: Colors.black),
+              segments: [
+                GaugeSegment('UnderWeight', 18.5, Colors.red),
+                GaugeSegment('UnderWeight', 6.4, Colors.green),
+                GaugeSegment('UnderWeight', 5, Colors.orange),
+                GaugeSegment('UnderWeight', 10.1, Colors.pink),
+              ],
+            ),
+            BlocBuilder<BmiCubit, BmiStates>(
+              builder: (context, state) {
+                if (state.getBmiEntriesState == RequestStatus.loading) {
+                  return const Center(child: CircularProgressIndicator(),);
+                }
+                if (state.getBmiEntriesState == RequestStatus.success) {
+                  lastEntry = state.bmiEntries?.last;
+                  return  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                      offset: Offset(0, 0),
+                                      color: Colors.grey,
+                                      blurRadius: 5)
+                                ]),
+                            child: const Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: Text('age')),
+                                Expanded(child: Text('height')),
+                                Expanded(child: Text('weight')),
+                                Expanded(child: Text('bmi')),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  });
-            },
-          )
-        ],
+                          ),
+                          SizedBox(height: 20.h,),
+                          Expanded(
+                            child: ListView.separated(
+                              controller: scrollController,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                    ),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        return Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  state.bmiEntries?[index].age
+                                                      .toString()??'',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  state.bmiEntries?[index].height
+                                                      .toString()??'',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  state.bmiEntries?[index].weight
+                                                      .toString()??'',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  state.bmiEntries?[index].bmi.toStringAsFixed(1)
+                                                      .toString()??'',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                              const Expanded(
+                                                  child: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.red,
+                                                  ))
+                                            ]);
+                                      },
+                                    ));
+                              },
+                              separatorBuilder: (context, index) {
+                                return const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                );
+                              },
+                              itemCount: state.bmiEntries?.length??0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+                },
+            )
+          ],
+        ),
       ),
     );
   }
+
   void setBmiInterpretation() {
     if (widget.bmi! > 30) {
       bmiStatus = "Obese";
@@ -155,4 +227,3 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
     }
   }
 }
-

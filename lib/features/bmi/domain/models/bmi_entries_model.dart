@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class BMIEntriesModel extends Equatable {
-  final double age;
+  final String age;
   final double height;
   final double weight;
   final double bmi;

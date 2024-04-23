@@ -19,13 +19,35 @@ class BMIRepositoryImpl extends BMIRepository {
   }
 
   @override
-  Stream<List<BMIEntriesModel>> getBmiEntriesFromFireStore() {
-    return bmiCollectionReference.snapshots().map((event) {
-      List<BMIEntriesModel> entries = [];
-      for (var document in event.docs) {
-        entries.add(BMIEntriesModel.fromJson(document.data()));
-      }
-      return entries;
-    });
+  Stream<List<BMIEntriesModel>> getBmiEntriesFromFireStore({required int limit, required BMIEntriesModel? last}) {
+
+    final query = bmiCollectionReference
+        .orderBy('dateTime', descending: true)
+        .limit(limit);
+
+    if (last != null) {
+      return query.startAfter([last.dateTime]).snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) => BMIEntriesModel.fromJson(doc.data())).toList();
+      });
+    } else {
+      return query.snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) => BMIEntriesModel.fromJson(doc.data())).toList();
+      });
+    }
   }
+
+  // @override
+  // Stream<List<BMIEntriesModel>> fetchMoreEntries(BMIEntriesModel? lastEntry) {
+  //   return FirebaseFirestore.instance.collection('bmi')
+  //       .orderBy('dateTime', descending: true)
+  //       .limit(10).startAfter([lastEntry?.dateTime])
+  //       .snapshots()
+  //       .map((event) {
+  //     List<BMIEntriesModel> entries = [];
+  //     for (var document in event.docs) {
+  //       entries.add(BMIEntriesModel.fromJson(document.data()));
+  //     }
+  //     return entries;
+  //   });
+  // }
 }
