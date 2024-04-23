@@ -8,16 +8,23 @@ class BmiStates extends Equatable {
   final String? errorMessage;
   final RequestStatus getBmiEntriesState;
   final List<BMIEntriesModel>? bmiEntries;
+  final RequestStatus? deleteBmiEntryState;
+  final RequestStatus? updateBmiEntryState;
 
   const BmiStates(
       {this.bmi,
       this.addBmiEntriesStatus = RequestStatus.initial,
       this.errorMessage = '',
       this.getBmiEntriesState = RequestStatus.initial,
-      this.bmiEntries});
+      this.bmiEntries,
+        this.deleteBmiEntryState,
+        this.updateBmiEntryState
+      });
 
   BmiStates copyWith(
       {double? bmi,
+        RequestStatus? deleteBmiEntryState,
+         RequestStatus? updateBmiEntryState,
       RequestStatus? addBmiEntriesStatus,
       String? errorMessage,
       RequestStatus? getBmiEntriesState,
@@ -32,5 +39,5 @@ class BmiStates extends Equatable {
 
   @override
   List<Object?> get props =>
-      [bmi, addBmiEntriesStatus, errorMessage, getBmiEntriesState, bmiEntries];
+      [bmi, addBmiEntriesStatus, errorMessage, getBmiEntriesState, bmiEntries, deleteBmiEntryState, updateBmiEntryState];
 }

@@ -18,7 +18,7 @@ class BmiPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BmiCubit(injector(),injector(),),
+      create: (context) => BmiCubit(),
       child: const BmiPageBody(),
     );
   }

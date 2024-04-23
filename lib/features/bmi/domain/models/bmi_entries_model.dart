@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class BMIEntriesModel extends Equatable {
+  final String? id;
   final String age;
   final double height;
   final double weight;
@@ -8,6 +9,7 @@ class BMIEntriesModel extends Equatable {
   final String dateTime;
 
   const BMIEntriesModel({
+     this.id,
     required this.age,
     required this.height,
     required this.weight,
@@ -16,6 +18,7 @@ class BMIEntriesModel extends Equatable {
   });
 
   factory BMIEntriesModel.fromJson(Map<String, dynamic> json) => BMIEntriesModel(
+    id: json['id'],
     age: json['age'],
     height: json['height'],
     weight: json['weight'],
@@ -34,14 +37,6 @@ class BMIEntriesModel extends Equatable {
 
 
 @override
-List<Object?> get props => [age, height, weight, bmi, dateTime];
+List<Object?> get props => [id,age, height, weight, bmi, dateTime];
 
-}
-
-enum BmiStatus
-{
-  underWeight,
-  normal,
-  overWeight,
-  obesity,
 }

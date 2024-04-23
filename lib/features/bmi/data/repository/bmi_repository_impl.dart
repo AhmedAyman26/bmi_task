@@ -14,7 +14,10 @@ class BMIRepositoryImpl extends BMIRepository {
     if (!(await networkInfo.isConnected)) {
       throw Exception('No Internet Connection');
     } else {
-      await bmiCollectionReference.add(bmiEntriesModel.toJson());
+      await bmiCollectionReference.add(bmiEntriesModel.toJson()).then((value)
+      {
+        bmiCollectionReference.doc(value.id).update({'id': value.id});
+      });
     }
   }
 
@@ -36,18 +39,17 @@ class BMIRepositoryImpl extends BMIRepository {
     }
   }
 
-  // @override
-  // Stream<List<BMIEntriesModel>> fetchMoreEntries(BMIEntriesModel? lastEntry) {
-  //   return FirebaseFirestore.instance.collection('bmi')
-  //       .orderBy('dateTime', descending: true)
-  //       .limit(10).startAfter([lastEntry?.dateTime])
-  //       .snapshots()
-  //       .map((event) {
-  //     List<BMIEntriesModel> entries = [];
-  //     for (var document in event.docs) {
-  //       entries.add(BMIEntriesModel.fromJson(document.data()));
-  //     }
-  //     return entries;
-  //   });
-  // }
+
+  @override
+  Future<void> deleteBmiEntriesFromFireStore(String id) async {
+  await bmiCollectionReference.doc(id).delete();
+
+  }
+
+  @override
+  Future<void> updateBmiEntriesInFireStore(String id, BMIEntriesModel bmiEntriesModel) async {
+  await bmiCollectionReference.doc(id).update(bmiEntriesModel.toJson());
+
+  }
+
 }

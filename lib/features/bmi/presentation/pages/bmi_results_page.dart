@@ -16,7 +16,7 @@ class BmiResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BmiCubit(injector(), injector(),),
+      create: (context) => BmiCubit(),
       child: BmiResultsPageBody(bmi: bmi),
     );
   }
@@ -95,108 +95,135 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
                   return const Center(child: CircularProgressIndicator(),);
                 }
                 if (state.getBmiEntriesState == RequestStatus.success) {
-                  lastEntry = state.bmiEntries?.last;
-                  return  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                      offset: Offset(0, 0),
-                                      color: Colors.grey,
-                                      blurRadius: 5)
-                                ]),
-                            child: const Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: Text('age')),
-                                Expanded(child: Text('height')),
-                                Expanded(child: Text('weight')),
-                                Expanded(child: Text('bmi')),
-                              ],
+                  if(state.bmiEntries!.isEmpty) {
+                    return const Center(child: Text('No Entries yet'),);
+                  }else {
+                    lastEntry = state.bmiEntries?.last;
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        offset: Offset(0, 0),
+                                        color: Colors.grey,
+                                        blurRadius: 5)
+                                  ]),
+                              child: const Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: Text('age')),
+                                  Expanded(child: Text('height')),
+                                  Expanded(child: Text('weight')),
+                                  Expanded(child: Text('bmi')),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 20.h,),
-                          Expanded(
-                            child: ListView.separated(
-                              controller: scrollController,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                    ),
-                                    child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        return Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  state.bmiEntries?[index].age
-                                                      .toString()??'',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
+                            SizedBox(height: 20.h,),
+                            Expanded(
+                              child: ListView.separated(
+                                controller: scrollController,
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                      ),
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Text(
+                                                    state.bmiEntries?[index].age
+                                                        .toString() ?? '',
+                                                    style: const TextStyle(
+                                                        color: Colors.black),
+                                                  ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  state.bmiEntries?[index].height
-                                                      .toString()??'',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Text(
+                                                    state.bmiEntries?[index]
+                                                        .height
+                                                        .toString() ?? '',
+                                                    style: const TextStyle(
+                                                        color: Colors.black),
+                                                  ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  state.bmiEntries?[index].weight
-                                                      .toString()??'',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Text(
+                                                    state.bmiEntries?[index]
+                                                        .weight
+                                                        .toString() ?? '',
+                                                    style: const TextStyle(
+                                                        color: Colors.black),
+                                                  ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  state.bmiEntries?[index].bmi.toStringAsFixed(1)
-                                                      .toString()??'',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Text(
+                                                    state.bmiEntries?[index].bmi
+                                                        .toStringAsFixed(1)
+                                                        .toString() ?? '',
+                                                    style: const TextStyle(
+                                                        color: Colors.black),
+                                                  ),
                                                 ),
-                                              ),
-                                              const Expanded(
-                                                  child: Icon(
-                                                    Icons.edit,
-                                                    color: Colors.red,
-                                                  ))
-                                            ]);
-                                      },
-                                    ));
-                              },
-                              separatorBuilder: (context, index) {
-                                return const Divider(
-                                  height: 1,
-                                  thickness: 1,
-                                );
-                              },
-                              itemCount: state.bmiEntries?.length??0,
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: ()
+                                                    {
+                                                    },
+                                                    child: const Icon(
+                                                      Icons.edit,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      context.read<BmiCubit>()
+                                                          .deleteEntry(state
+                                                          .bmiEntries?[index]
+                                                          .id ?? '');
+                                                    },
+                                                    child: const Icon(
+                                                      Icons.delete,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]);
+                                        },
+                                      ));
+                                },
+                                separatorBuilder: (context, index) {
+                                  return const Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                  );
+                                },
+                                itemCount: state.bmiEntries?.length ?? 0,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 }
                 return const SizedBox.shrink();
                 },
