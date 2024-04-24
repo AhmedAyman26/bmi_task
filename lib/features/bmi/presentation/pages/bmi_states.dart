@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 
 class BmiStates extends Equatable {
   final RequestStatus? addBmiEntriesStatus;
-  final double? bmi;
   final String? errorMessage;
   final RequestStatus getBmiEntriesState;
   final List<BMIEntriesModel>? bmiEntries;
@@ -12,25 +11,22 @@ class BmiStates extends Equatable {
   final RequestStatus? updateBmiEntryState;
 
   const BmiStates(
-      {this.bmi,
-      this.addBmiEntriesStatus = RequestStatus.initial,
+      {this.addBmiEntriesStatus = RequestStatus.initial,
       this.errorMessage = '',
       this.getBmiEntriesState = RequestStatus.initial,
       this.bmiEntries,
-        this.deleteBmiEntryState,
-        this.updateBmiEntryState
-      });
+      this.deleteBmiEntryState,
+      this.updateBmiEntryState});
 
   BmiStates copyWith(
       {double? bmi,
-        RequestStatus? deleteBmiEntryState,
-         RequestStatus? updateBmiEntryState,
+      RequestStatus? deleteBmiEntryState,
+      RequestStatus? updateBmiEntryState,
       RequestStatus? addBmiEntriesStatus,
       String? errorMessage,
       RequestStatus? getBmiEntriesState,
       List<BMIEntriesModel>? bmiEntries}) {
     return BmiStates(
-        bmi: bmi ?? this.bmi,
         addBmiEntriesStatus: addBmiEntriesStatus ?? this.addBmiEntriesStatus,
         errorMessage: errorMessage ?? this.errorMessage,
         getBmiEntriesState: getBmiEntriesState ?? this.getBmiEntriesState,
@@ -38,6 +34,12 @@ class BmiStates extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [bmi, addBmiEntriesStatus, errorMessage, getBmiEntriesState, bmiEntries, deleteBmiEntryState, updateBmiEntryState];
+  List<Object?> get props => [
+        addBmiEntriesStatus,
+        errorMessage,
+        getBmiEntriesState,
+        bmiEntries,
+        deleteBmiEntryState,
+        updateBmiEntryState
+      ];
 }

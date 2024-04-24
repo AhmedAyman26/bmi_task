@@ -7,7 +7,7 @@ class GetBmiEntriesUseCase {
 
   const GetBmiEntriesUseCase(this._bmiRepository);
 
-  Stream<List<BMIEntriesModel>> call({required int limit,  BMIEntriesModel? last})  {
+  Stream<List<BMIEntriesModel>> call({required int limit,  DocumentSnapshot? last})  {
      return _bmiRepository.getBmiEntriesFromFireStore(limit: limit, last: last);
   }
 }

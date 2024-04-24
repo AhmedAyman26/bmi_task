@@ -14,42 +14,44 @@ class BMIRepositoryImpl extends BMIRepository {
     if (!(await networkInfo.isConnected)) {
       throw Exception('No Internet Connection');
     } else {
-      await bmiCollectionReference.add(bmiEntriesModel.toJson()).then((value)
-      {
+      await bmiCollectionReference.add(bmiEntriesModel.toJson()).then((value) {
         bmiCollectionReference.doc(value.id).update({'id': value.id});
       });
     }
   }
 
   @override
-  Stream<List<BMIEntriesModel>> getBmiEntriesFromFireStore({required int limit, required BMIEntriesModel? last}) {
-
+  Stream<List<BMIEntriesModel>> getBmiEntriesFromFireStore(
+      {required int limit, required DocumentSnapshot? last}) {
     final query = bmiCollectionReference
         .orderBy('dateTime', descending: true)
         .limit(limit);
 
     if (last != null) {
-      return query.startAfter([last.dateTime]).snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) => BMIEntriesModel.fromJson(doc.data())).toList();
+      return query.startAfterDocument(last).snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return BMIEntriesModel.fromJson(doc.data())
+              .modify(documentSnapshot: doc);
+        }).toList();
       });
     } else {
       return query.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) => BMIEntriesModel.fromJson(doc.data())).toList();
+        return snapshot.docs.map((doc) {
+          return BMIEntriesModel.fromJson(doc.data())
+              .modify(documentSnapshot: doc);
+        }).toList();
       });
     }
   }
 
-
   @override
   Future<void> deleteBmiEntriesFromFireStore(String id) async {
-  await bmiCollectionReference.doc(id).delete();
-
+    await bmiCollectionReference.doc(id).delete();
   }
 
   @override
-  Future<void> updateBmiEntriesInFireStore(String id, BMIEntriesModel bmiEntriesModel) async {
-  await bmiCollectionReference.doc(id).update(bmiEntriesModel.toJson());
-
+  Future<void> updateBmiEntriesInFireStore(
+      String id, BMIEntriesModel bmiEntriesModel) async {
+    await bmiCollectionReference.doc(id).update(bmiEntriesModel.toJson());
   }
-
 }

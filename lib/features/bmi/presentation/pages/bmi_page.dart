@@ -38,6 +38,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+  double bmi = 0;
   @override
   void dispose() {
     ageController.dispose();
@@ -85,6 +86,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                   child: Column(
                     children: [
                       AppTextFormField(
+                        type: TextInputType.number,
                         controller: ageController,
                         hintText: 'Age',
                         label: 'Age',
@@ -96,6 +98,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                         },
                       ),
                       AppTextFormField(
+                        type: TextInputType.number,
                         controller: heightController,
                         hintText: 'Height',
                         suffix: const Text('m'),
@@ -108,6 +111,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
                         },
                       ),
                       AppTextFormField(
+                        type: TextInputType.number,
                         controller: weightController,
                         hintText: 'Weight',
                         suffix: const Text('kg'),
@@ -133,7 +137,7 @@ class _BmiPageBodyState extends State<BmiPageBody> {
           listener: (context, state) {
             if (state.addBmiEntriesStatus == RequestStatus.success) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>  BmiResultPage(bmi: state.bmi),));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  BmiResultPage(bmi: bmi),));
             }
             if(state.addBmiEntriesStatus == RequestStatus.loading){
               showLoading(context);
@@ -141,22 +145,18 @@ class _BmiPageBodyState extends State<BmiPageBody> {
           },
           builder: (context, state) {
             return AppButton(text: 'Calculate BMI', function: () {
+              final bmiEntry = BMIEntriesModel(
+                height: double.parse(heightController.text),
+                weight: double.parse(weightController.text),
+                age: ageController.text,
+                dateTime: DateTime.now().toString(),
+              );
               if (formKey.currentState!.validate()) {
-                BlocProvider
-                    .of<BmiCubit>(context).calculateBmi(BMIEntriesModel(
-                    height: double.parse(heightController.text),
-                    weight: double.parse(weightController.text),
-                    age: ageController.text,
-                    bmi: state.bmi ?? 0.0,
-                    dateTime: DateTime.now().toString()));
+               bmi = (bmiEntry.weight /
+                    (bmiEntry.height * bmiEntry.height));
                 BlocProvider
                     .of<BmiCubit>(context)
-                    .addBmiEntries(BMIEntriesModel(
-                    height: double.parse(heightController.text),
-                    weight: double.parse(weightController.text),
-                    age: ageController.text,
-                    bmi: state.bmi ?? 0.0,
-                    dateTime: DateTime.now().toString()));
+                    .addBmiEntries(bmiEntry.modify(bmi: bmi));
               }
             }, radius: 30,);
           },

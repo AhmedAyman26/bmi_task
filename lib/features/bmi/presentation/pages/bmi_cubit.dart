@@ -27,11 +27,6 @@ class BmiCubit extends Cubit<BmiStates> {
     _deleteBmiEntryUseCase= injector();
   }
 
-  void calculateBmi(BMIEntriesModel bmiEntriesModel) {
-    final bmi = (bmiEntriesModel.weight /
-        (bmiEntriesModel.height * bmiEntriesModel.height));
-    emit(state.copyWith(bmi: bmi));
-  }
 
   void addBmiEntries(BMIEntriesModel bmiEntriesModel) async {
     emit(state.copyWith(addBmiEntriesStatus: RequestStatus.loading));
@@ -75,10 +70,9 @@ class BmiCubit extends Cubit<BmiStates> {
   }
 
 
-  void loadMoreEntries(BMIEntriesModel? last) async {
-    emit(state.copyWith(getBmiEntriesState: RequestStatus.loading));
+  void loadMoreEntries(DocumentSnapshot? last) async {
     final entries = await _getBmiEntriesUseCase.call(limit: 10, last: last).first;
-    emit(state.copyWith(bmiEntries: state.bmiEntries! + entries));
+    emit(state.copyWith(bmiEntries: state.bmiEntries! + entries, getBmiEntriesState: RequestStatus.success));
   }
 
   void deleteEntry(String id) async {

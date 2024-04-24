@@ -1,8 +1,10 @@
-import 'package:bmi_task/core/di/app_injector.dart';
 import 'package:bmi_task/core/utils/request_status.dart';
+import 'package:bmi_task/core/widgets/app_button.dart';
+import 'package:bmi_task/core/widgets/app_text_form_field.dart';
 import 'package:bmi_task/features/bmi/domain/models/bmi_entries_model.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_cubit.dart';
 import 'package:bmi_task/features/bmi/presentation/pages/bmi_states.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,8 +40,8 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
 
   Color? bmiStatusColor;
 
-  BMIEntriesModel? lastEntry;
-
+  DocumentSnapshot? lastDocument;
+  bool isLastPage = false;
   ScrollController scrollController = ScrollController();
 
   @override
@@ -49,7 +51,8 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
     scrollController.addListener(() {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
-        context.read<BmiCubit>().loadMoreEntries(lastEntry);
+          context.read<BmiCubit>().loadMoreEntries(lastDocument);
+        
       }
     });
     super.initState();
@@ -63,7 +66,7 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
           children: [
             const Text(
               'Your BMI is',
-              style: TextStyle(fontSize: 30, color: Colors.greenAccent),
+              style: TextStyle(fontSize: 30, color: Colors.black),
             ),
             SizedBox(
               height: 20.h,
@@ -72,16 +75,23 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
               showMarkers: true,
               gaugeSize: 400,
               currentValue: widget.bmi,
-              valueWidget:  Column(
+              valueWidget: Column(
                 children: [
-                  Text(widget.bmi?.toStringAsFixed(1)??'', style: TextStyle(fontSize: 30.sp, color: Colors.black),),
-                  Text(bmiStatus??'', style: TextStyle(fontSize: 20.sp, color: bmiStatusColor,)),
+                  Text(
+                    widget.bmi?.toStringAsFixed(1) ?? '',
+                    style: TextStyle(fontSize: 30.sp, color: Colors.black),
+                  ),
+                  Text(bmiStatus ?? '',
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        color: bmiStatusColor,
+                      )),
                 ],
               ),
               minValue: 0,
               maxValue: 40,
-              startMarkerStyle: TextStyle(fontSize: 30.sp, color: Colors.black),
-              endMarkerStyle: TextStyle(fontSize: 30.sp, color: Colors.black),
+              startMarkerStyle: TextStyle(fontSize: 25.sp, color: Colors.black),
+              endMarkerStyle: TextStyle(fontSize: 25.sp, color: Colors.black),
               segments: [
                 GaugeSegment('UnderWeight', 18.5, Colors.red),
                 GaugeSegment('UnderWeight', 6.4, Colors.green),
@@ -92,13 +102,17 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
             BlocBuilder<BmiCubit, BmiStates>(
               builder: (context, state) {
                 if (state.getBmiEntriesState == RequestStatus.loading) {
-                  return const Center(child: CircularProgressIndicator(),);
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
                 if (state.getBmiEntriesState == RequestStatus.success) {
-                  if(state.bmiEntries!.isEmpty) {
-                    return const Center(child: Text('No Entries yet'),);
-                  }else {
-                    lastEntry = state.bmiEntries?.last;
+                  if (state.bmiEntries!.isEmpty) {
+                    return const Center(
+                      child: Text('No Entries yet'),
+                    );
+                  } else {
+                    lastDocument = state.bmiEntries?.last.documentSnapshot;
                     return Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -175,35 +189,22 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
                                                   flex: 2,
                                                   child: Text(
                                                     state.bmiEntries?[index].bmi
-                                                        .toStringAsFixed(1)
+                                                        ?.toStringAsFixed(1)
                                                         .toString() ?? '',
                                                     style: const TextStyle(
                                                         color: Colors.black),
                                                   ),
                                                 ),
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: ()
-                                                    {
-                                                    },
-                                                    child: const Icon(
-                                                      Icons.edit,
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      context.read<BmiCubit>()
-                                                          .deleteEntry(state
-                                                          .bmiEntries?[index]
-                                                          .id ?? '');
-                                                    },
-                                                    child: const Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context.read<BmiCubit>()
+                                                        .deleteEntry(state
+                                                        .bmiEntries?[index]
+                                                        .id ?? '');
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
                                                   ),
                                                 ),
                                               ]);
@@ -226,7 +227,7 @@ class _BmiResultsPageBodyState extends State<BmiResultsPageBody> {
                   }
                 }
                 return const SizedBox.shrink();
-                },
+              },
             )
           ],
         ),
