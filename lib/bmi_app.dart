@@ -16,7 +16,7 @@ class BMIApp extends StatelessWidget {
       splitScreenMode: true,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: userId != null ?  BmiPage() : const SignInPage(),
+        home: userId != null ?  const BmiPage() : const SignInPage(),
       ),
     );
   }
